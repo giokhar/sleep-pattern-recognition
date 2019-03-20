@@ -1,4 +1,4 @@
-import pandas as pd, numpy as np, json, datetime
+import pandas as pd, numpy as np, datetime, json
 
 def datetime_str_to_object(fitbit_str):
     """Helper function to convert fitbit datetime str into python datetime object"""
@@ -35,7 +35,8 @@ def get_dataframe(date):
     
     return df[['half_mins_passed','heart_rate','sleep_stage']] # correct order
 
-import subprocess, json, re
+import subprocess, re
+keys = json.loads(open('keys.json').read())
 
 def json_from_str(s):
     match = re.findall(r"{.+[:,].+}|\[.+[,:].+\]", s)
@@ -43,6 +44,8 @@ def json_from_str(s):
 
 def get_data_from_server():
     get = "https://api.fitbit.com/1/user/-/activities/heart/date/2019-03-19/1d/1min.json"
-    output = subprocess.check_output(["curl","-i","-H","Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkRLVzciLCJzdWIiOiI3RDk3UE0iLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd3BybyB3bnV0IHdzbGUgd3dlaSB3c29jIHdhY3Qgd3NldCB3bG9jIiwiZXhwIjoxNTUzNjQwNTIxLCJpYXQiOjE1NTMwMzU3MjF9.9HpnA3fFwMp--6VKXjYVMetocHUPkETx43AQCDURnNE", get]).decode('ascii')
+    output = subprocess.check_output(["curl","-i","-H", keys["AUTH"], get]).decode('ascii')
     
     return json_from_str(output)
+
+print(get_data_from_server())
