@@ -3,6 +3,28 @@ import glob, datetime, json, re, subprocess
 
 keys = json.loads(open('keys.json').read())
 
+# DATA IMPORTER
+# ================================================================================
+def import_dataframes():
+    """Function that concatinates all data and returns the big df"""
+    all_frames = []
+    for date in get_existing_days():
+        all_frames.append(pd.read_csv('data/alta_hr/'+date+".csv", index_col="time"))
+    return pd.concat(all_frames)
+
+# ================================================================================
+
+# DATA UPDATER
+# ================================================================================
+def update_data_files():
+    """Funtion that downloads the most recent csv files in the data directory"""
+    for date in get_missing_days():
+        get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
+# ================================================================================
+
+
+# DATA GATHERING FROM THE API
+# ================================================================================
 def get_data_from_server(date, data_type):
     """Calling subprocess to retrieve the data from fitbit api"""
     get = keys['API_URL'] # api base url
@@ -46,14 +68,9 @@ def get_dataframe(date):
     
     return df[['half_mins_passed','heart_rate','sleep_stage']] # correct order
 
-def update_data_files():
-    """Funtion that downloads the most recent csv files in the data directory"""
-    for date in get_missing_days():
-        get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
 
-
-# Helper functions
-# ================
+# HELPERS
+# ================================================================================
 def json_from_str(s):
     """Helper function to match json object from the string data"""
     match = re.findall(r"{.+[:,].+}|\[.+[,:].+\]", s)
@@ -63,11 +80,17 @@ def datetime_str_to_object(fitbit_str):
     """Helper function to convert fitbit datetime str into python datetime object"""
     return datetime.datetime.strptime(fitbit_str, "%Y-%m-%dT%H:%M:%S.000")
 
-def get_missing_days():
-    """Helper function to get the missing dates from the data directory"""
-    existing_days, missing_days = [], []
+def get_existing_days():
+    """Helper function to get the existing dates from the data directory"""
+    existing_days = []
     for i in glob.glob('data/alta_hr/*.csv'):
         existing_days.append(i[13:23]) # get existing days from the data
+    return existing_days
+
+def get_missing_days():
+    """Helper function to get the missing dates from the data directory"""
+    missing_days = []
+    existing_days = get_existing_days()
     # sort and get the most recent date
     last_updated = datetime.datetime.strptime(sorted(existing_days, key=lambda x: datetime.datetime.strptime(x, '%Y-%m-%d'))[-1], '%Y-%m-%d')
     # find the missing days till today
