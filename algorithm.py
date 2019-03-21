@@ -1,8 +1,8 @@
-from data_cleaning import get_dataframe
+from data_collection import update_data_files
 
 
 def main():
-	print(get_dataframe('2019-03-19'))
+	update_data_files()
 
 
 if __name__ == '__main__':
