@@ -19,7 +19,8 @@ def import_dataframes():
 def update_data_files():
     """Funtion that downloads the most recent csv files in the data directory"""
     for date in get_missing_days():
-        get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
+        if len(get_dataframe(date)) != 0:
+            get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
 # ================================================================================
 
 
@@ -53,20 +54,24 @@ def get_dataframe(date):
     # create pandas dataframe from json, resample 30 seconds and write mean(integer) of heart rates
     df = pd.DataFrame(get_heart_rate_data(date)).set_index('time').resample('30s').mean().fillna(0).astype(int)
     df['sleep_stage'] = np.nan # fill sleep_stages with nan values
+    isDetailed = False
 
     # get sleep data from the data file
     data = get_data_from_server(date, "sleep")
     for sleep in data['sleep']:
-        if sleep['isMainSleep'] == True: # get the main sleep(night sleep, not naps)
+        if sleep['isMainSleep'] == True and sleep['type'] == "stages": # get the detailed main sleep(night sleep, not naps)
+            isDetailed = True
             start_time = datetime_str_to_object(sleep['startTime'])# sleep start time
             end_time = datetime_str_to_object(sleep['endTime'])# sleep end time
             for item in sleep['levels']['data']:
                 df.loc[datetime_str_to_object(item['dateTime']), 'sleep_stage'] = item['level']
-        
-    df = df.loc[start_time:end_time,].fillna(method='ffill')
-    df['half_mins_passed'] = np.arange(len(df))
     
-    return df[['half_mins_passed','heart_rate','sleep_stage']] # correct order
+    if isDetailed:
+        df = df.loc[start_time:end_time,].fillna(method='ffill')
+        df['half_mins_passed'] = np.arange(len(df))
+    
+        return df[['half_mins_passed','heart_rate','sleep_stage']] # correct order
+    return []
 
 
 # HELPERS
