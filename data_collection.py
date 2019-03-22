@@ -71,7 +71,7 @@ def get_dataframe(date):
         df['half_mins_passed'] = np.arange(len(df))
     
         return df[['half_mins_passed','heart_rate','sleep_stage']] # correct order
-    return []
+    return [] # return empty list to indicate that there is no detailed sleep
 
 
 # HELPERS
