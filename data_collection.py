@@ -59,7 +59,7 @@ def get_dataframe(date):
     # get sleep data from the data file
     data = get_data_from_server(date, "sleep")
     for sleep in data['sleep']:
-        if sleep['isMainSleep'] == True and sleep['type'] == "stages": # get the detailed main sleep(night sleep, not naps)
+        if sleep['type'] == "stages": # get the detailed sleeps as many as there are in 24hrs
             isDetailed = True
             start_time = datetime_str_to_object(sleep['startTime'])# sleep start time
             end_time = datetime_str_to_object(sleep['endTime'])# sleep end time
