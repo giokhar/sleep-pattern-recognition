@@ -10,7 +10,7 @@ def import_dataframes():
     all_frames = []
     for date in get_existing_days():
         all_frames.append(pd.read_csv('data/alta_hr/'+date+".csv", index_col="time"))
-    return pd.concat(all_frames)
+    return pd.concat(all_frames, sort=True)
 
 # ================================================================================
 
