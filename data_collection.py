@@ -33,6 +33,8 @@ def get_data_from_server(date, data_type):
         get += "activities/heart/date/"+date+"/1d/1sec.json"
     elif data_type == "sleep":
         get += "sleep/date/"+date+".json"
+    elif data_type == "calories":
+        get += "activities/calories/date/"+date+"/1d.json"
 
     output = subprocess.check_output(["curl","-i","-H", keys["AUTH"], get]).decode('ascii')
     
@@ -49,11 +51,30 @@ def get_heart_rate_data(date):
             
     return {'time':times, 'heart_rate':heart_rates}
 
+def get_activity_data(date):
+    activity, mets, times, calories = [], [], [], []
+    data = get_data_from_server(date,"calories")
+    
+    for item in data['activities-calories-intraday']['dataset']:
+        current_time = datetime_str_to_object(date+"T"+item['time']+".000")
+        times.append(current_time)
+        times.append(current_time + datetime.timedelta(seconds=30))
+        activity.append(item['level'])
+        activity.append(item['level'])
+        mets.append(item['mets']/2)
+        mets.append(item['mets']/2)
+        calories.append(item['value']/2)
+        calories.append(item['value']/2)
+        
+    return {"time":times, "activity":activity, "mets":mets, "calories":calories}
+
 def get_dataframe(date):
     """Returns the df of time(index), heart_rate, sleep_stage, half_mins_passed"""
     # create pandas dataframe from json, resample 30 seconds and write mean(integer) of heart rates
-    df = pd.DataFrame(get_heart_rate_data(date)).set_index('time').resample('30s').mean().fillna(0).astype(int)
-    clean_df = pd.DataFrame(columns=['heart_rate','sleep_stage','half_mins_passed'])
+    df_heart = pd.DataFrame(get_heart_rate_data(date)).set_index('time').resample('30s').mean().fillna(0).astype(int) # heart rate df
+    df_activity = pd.DataFrame(get_activity_data(date)).set_index('time') # activity df
+    df = df_heart.join(df_activity)
+    clean_df = pd.DataFrame(columns=['heart_rate','sleep_stage','half_mins_passed', 'activity', 'mets', 'calories'])
 
     # get sleep data from the data file
     data = get_data_from_server(date, "sleep")
@@ -73,7 +94,7 @@ def get_dataframe(date):
             clean_df['half_mins_passed'] = clean_df['half_mins_passed'].astype(int)  # convert column to int
             clean_df.index.name='time' # name our index as time
     
-    return clean_df[['half_mins_passed','heart_rate','sleep_stage']] #returns empty list if no detailed sleep found
+    return clean_df[['half_mins_passed','heart_rate','sleep_stage','activity','mets','calories']] #returns empty list if no detailed sleep found
 
 # HELPERS
 # ================================================================================
