@@ -8,7 +8,7 @@ def main():
 	# update_data_files()
 	df = import_dataframes()
 
-	X = df[["half_mins_passed","heart_rate", "mets", "calories"]]
+	X = df[["half_mins_passed","heart_rate", "activity", "mets", "calories"]]
 	y = df['sleep_stage']
 
 	model = SVC(kernel='rbf', C=1E10, gamma='auto')
