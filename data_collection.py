@@ -19,7 +19,7 @@ def import_dataframes():
 def update_data_files():
     """Funtion that downloads the most recent csv files in the data directory"""
     for date in get_missing_days():
-        if len(get_dataframe(date)) != 0:
+        if len(get_dataframe(date)) != 0: # if dataframe is not empty for this date
             get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
 # ================================================================================
 
@@ -53,26 +53,27 @@ def get_dataframe(date):
     """Returns the df of time(index), heart_rate, sleep_stage, half_mins_passed"""
     # create pandas dataframe from json, resample 30 seconds and write mean(integer) of heart rates
     df = pd.DataFrame(get_heart_rate_data(date)).set_index('time').resample('30s').mean().fillna(0).astype(int)
-    df['sleep_stage'] = np.nan # fill sleep_stages with nan values
-    isDetailed = False
+    clean_df = pd.DataFrame(columns=['heart_rate','sleep_stage','half_mins_passed'])
 
     # get sleep data from the data file
     data = get_data_from_server(date, "sleep")
     for sleep in data['sleep']:
         if sleep['type'] == "stages": # get the detailed sleeps as many as there are in 24hrs
-            isDetailed = True
             start_time = datetime_str_to_object(sleep['startTime'])# sleep start time
             end_time = datetime_str_to_object(sleep['endTime'])# sleep end time
+            
+            # get only sleep time heart rate data from the entire day heart rate data
+            clean_df = clean_df.append(df.loc[start_time:end_time,], sort=True)
             for item in sleep['levels']['data']:
-                df.loc[datetime_str_to_object(item['dateTime']), 'sleep_stage'] = item['level']
+                clean_df.loc[datetime_str_to_object(item['dateTime']), 'sleep_stage'] = item['level']
+            clean_df['time'] = clean_df.index # create a time column that is equal to index
+            clean_df = clean_df.fillna(method='ffill') # forward fill the sleep stages in-between
+            # generate the amount of 30 seconds passed based on the time and sleep start_time
+            clean_df.loc[clean_df['half_mins_passed'].isnull(), 'half_mins_passed'] = clean_df.apply(lambda x: (x['time']-start_time).total_seconds()//30, axis=1)
+            clean_df['half_mins_passed'] = clean_df['half_mins_passed'].astype(int)  # convert column to int
+            clean_df.index.name='time' # name our index as time
     
-    if isDetailed:
-        df = df.loc[start_time:end_time,].fillna(method='ffill')
-        df['half_mins_passed'] = np.arange(len(df))
-    
-        return df[['half_mins_passed','heart_rate','sleep_stage']] # correct order
-    return [] # return empty list to indicate that there is no detailed sleep
-
+    return clean_df[['half_mins_passed','heart_rate','sleep_stage']] #returns empty list if no detailed sleep found
 
 # HELPERS
 # ================================================================================
