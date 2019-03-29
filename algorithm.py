@@ -8,8 +8,8 @@ def main():
 	# update_data_files()
 	df = import_dataframes()
 
-	X = df[["half_mins_passed","heart_rate", "activity", "mets", "calories"]]
-	y = df['sleep_stage']
+	X = df[["half_mins_passed","heart_rate", "calories"]]
+	y = df['sleep_stage'].replace(['wake','deep','rem'],'non-light')
 
 	model = SVC(kernel='rbf', C=1E10, gamma='auto')
 	X1, X2, y1, y2 = train_test_split(X, y, random_state=0, train_size=0.5, test_size=0.5)
