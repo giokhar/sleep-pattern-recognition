@@ -5,11 +5,16 @@ keys = json.loads(open('keys.json').read())
 
 # DATA IMPORTER
 # ================================================================================
-def import_dataframes():
+def import_dataframes(amount="*"):
     """Function that concatinates all data and returns the big df"""
     all_frames = []
+    counter = 0
     for date in get_existing_days():
         all_frames.append(pd.read_csv('data/alta_hr/'+date+".csv", index_col="time"))
+        counter += 1
+        if amount != "*":
+            if counter == amount:
+                break
     return pd.concat(all_frames, sort=True)
 
 # ================================================================================
