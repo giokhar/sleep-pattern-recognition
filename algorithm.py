@@ -1,5 +1,4 @@
 from data_collection import update_data_files, import_dataframes
-import pandas as pd
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split, cross_val_score
@@ -9,6 +8,17 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
+
+def get_model_score(model, df, binary=True):
+	X = df[["half_mins_passed","heart_rate", "calories", "mets"]]
+	y = df['sleep_stage']
+	if binary:
+		y = y.replace(['wake','deep','rem'],'non-light')
+
+	X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=21, test_size=0.3, stratify=y)
+	model.fit(X_train, y_train)
+	return model.score(X_test, y_test)
+
 
 def main():
 	# update_data_files()

@@ -117,7 +117,7 @@ def get_existing_days():
     existing_days = []
     for i in glob.glob('data/alta_hr/*.csv'):
         existing_days.append(i[13:23]) # get existing days from the data
-    return existing_days
+    return sorted(existing_days)
 
 def get_missing_days():
     """Helper function to get the missing dates from the data directory"""
