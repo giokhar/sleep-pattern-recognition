@@ -6,11 +6,11 @@ app = Flask(__name__, static_url_path='/static')
 app.secret_key = 'NO_SECRET_KEY'
 
 algorithms = {
-	"KNearestNeighbor":alg.K_NEAREST_NEIGHBOR,
-	"SupportVectorMachine":alg.SUPPORT_VECTOR_MACHINE,
-	"DecisionTree" :alg.DECISION_TREE,
-	"RandomForest" :alg.RANDOM_FOREST,
-	"NeuralNetwork" :alg.NEURAL_NETWORK
+	"KNearestNeighbor"		: alg.K_NEAREST_NEIGHBOR,
+	"SupportVectorMachine" 	: alg.SUPPORT_VECTOR_MACHINE,
+	"DecisionTree"			: alg.DECISION_TREE,
+	"RandomForest"			: alg.RANDOM_FOREST,
+	"NeuralNetwork"			: alg.NEURAL_NETWORK
 }
 @app.route('/')
 def index():
