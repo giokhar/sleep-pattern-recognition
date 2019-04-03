@@ -3,10 +3,61 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+	 <link rel="stylesheet" type="text/css" href = "https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.css" />
+ </head>
 </head>
 <body>
-
-	{{ data['df'] }}
 	
+	<div class="chart-container" style="position: relative; height:20vh; width:40vw">
+    	<canvas id="myChart"></canvas>
+	</div>
+	
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+<script>
+
+	function getRandomColor() {
+		var num = Math.round(0xffffff * Math.random());
+		var r = num >> 16;
+		var g = num >> 8 & 255;
+		var b = num & 255;
+		return r + ', ' + g + ', ' + b;
+	}
+
+	var randomColor = getRandomColor();
+
+	var ctx = document.getElementById('myChart').getContext('2d');
+	var myChart = new Chart(ctx, {
+	    type: 'line',
+	    data: {
+	        labels: {{ data['labels'] }},
+	        datasets: [{
+	            label: "{{ data['title'] }}",
+	            data: {{ data['values'] }},
+	            borderWidth: 2,
+	            backgroundColor: 'rgba('+randomColor+', 0.2)',
+	            borderColor: 'rgb('+randomColor+')',
+	            fill: 'origin'
+	        }]
+	    },
+	    options: {
+	    	responsive: true,
+	        scales: {
+	        	xAxes: [{
+					scaleLabel: {
+						display: true,
+						labelString: 'Days'
+					}
+				}],
+	            yAxes: [{
+	                display: true,
+					scaleLabel: {
+						display: true,
+						labelString: 'Accuracy %'
+					}
+	            }]
+	        }
+	    }
+	});
+</script>
 </body>
 </html>

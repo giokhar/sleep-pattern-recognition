@@ -119,6 +119,9 @@ def get_existing_days():
         existing_days.append(i[13:23]) # get existing days from the data
     return sorted(existing_days)
 
+def get_num_days():
+    return len(get_existing_days())
+
 def get_missing_days():
     """Helper function to get the missing dates from the data directory"""
     missing_days = []
