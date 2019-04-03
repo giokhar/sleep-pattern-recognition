@@ -10,12 +10,15 @@ def import_dataframes(amount="*"):
     all_frames = []
     counter = 0
     for date in get_existing_days():
-        all_frames.append(pd.read_csv('data/alta_hr/'+date+".csv", index_col="time"))
+        all_frames.append(pd.read_csv('data/alta_hr/'+date+".csv", index_col="datetime"))
         counter += 1
         if amount != "*":
             if counter == amount:
                 break
-    return pd.concat(all_frames, sort=True)
+    merged_df = pd.concat(all_frames, sort=True)
+    merged_df['time'] = merged_df.index
+    merged_df['time'] = merged_df['time'].apply(lambda x: datetime_str_into_seconds(x))
+    return merged_df[['time','heart_rate','half_mins_passed','activity','mets','calories','sleep_stage']]
 
 # ================================================================================
 
@@ -93,14 +96,13 @@ def get_dataframe(date):
             for item in sleep['levels']['data']:
                 clean_df.loc[datetime_str_to_object(item['dateTime']), 'sleep_stage'] = item['level']
             clean_df['datetime'] = clean_df.index # create a datetime column that is equal to index
-            clean_df['time'] = clean_df['datetime'].apply(lambda x: x.time()) # get time from the datetime
             clean_df = clean_df.fillna(method='ffill') # forward fill the sleep stages in-between
             # generate the amount of 30 seconds passed based on the time and sleep start_time
             clean_df.loc[clean_df['half_mins_passed'].isnull(), 'half_mins_passed'] = clean_df.apply(lambda x: (x['datetime']-start_time).total_seconds()//30, axis=1)
             clean_df['half_mins_passed'] = clean_df['half_mins_passed'].astype(int)  # convert column to int
             clean_df.index.name='datetime' # name our index as datetime
     
-    return clean_df[['time', 'half_mins_passed','heart_rate','sleep_stage','activity','mets','calories']] #returns empty list if no detailed sleep found
+    return clean_df #returns empty list if no detailed sleep found
 
 # HELPERS
 # ================================================================================
@@ -113,6 +115,10 @@ def datetime_str_to_object(fitbit_str):
     """Helper function to convert fitbit datetime str into python datetime object"""
     return datetime.datetime.strptime(fitbit_str, "%Y-%m-%dT%H:%M:%S.000")
 
+def datetime_str_into_seconds(datetime_str):
+    time = datetime.datetime.strptime(datetime_str,"%Y-%m-%d %H:%M:%S").time()
+    return (time.hour * 60 + time.minute) * 60 + time.second
+    
 def get_existing_days():
     """Helper function to get the existing dates from the data directory"""
     existing_days = []
@@ -133,5 +139,3 @@ def get_missing_days():
     for i in range((datetime.datetime.today()-last_updated).days):
         missing_days.append((datetime.datetime.today() - datetime.timedelta(days=i)).strftime('%Y-%m-%d'))
     return missing_days
-
-update_data_files()

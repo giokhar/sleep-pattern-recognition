@@ -14,7 +14,7 @@ NEURAL_NETWORK 			= MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes
 
 def get_model_score(model, days="*", binary=True):
 	df = import_dataframes(days)
-	X = df[["half_mins_passed","heart_rate", "calories", "mets"]]
+	X = df[["time","half_mins_passed","heart_rate", "calories", "mets"]]
 	y = df['sleep_stage']
 	if binary:
 		y = y.replace(['wake','deep','rem'],'non-light')
