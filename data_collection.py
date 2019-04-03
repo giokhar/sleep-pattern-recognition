@@ -92,14 +92,15 @@ def get_dataframe(date):
             clean_df = clean_df.append(df.loc[start_time:end_time,], sort=True)
             for item in sleep['levels']['data']:
                 clean_df.loc[datetime_str_to_object(item['dateTime']), 'sleep_stage'] = item['level']
-            clean_df['time'] = clean_df.index # create a time column that is equal to index
+            clean_df['datetime'] = clean_df.index # create a datetime column that is equal to index
+            clean_df['time'] = clean_df['datetime'].apply(lambda x: x.time()) # get time from the datetime
             clean_df = clean_df.fillna(method='ffill') # forward fill the sleep stages in-between
             # generate the amount of 30 seconds passed based on the time and sleep start_time
-            clean_df.loc[clean_df['half_mins_passed'].isnull(), 'half_mins_passed'] = clean_df.apply(lambda x: (x['time']-start_time).total_seconds()//30, axis=1)
+            clean_df.loc[clean_df['half_mins_passed'].isnull(), 'half_mins_passed'] = clean_df.apply(lambda x: (x['datetime']-start_time).total_seconds()//30, axis=1)
             clean_df['half_mins_passed'] = clean_df['half_mins_passed'].astype(int)  # convert column to int
-            clean_df.index.name='time' # name our index as time
+            clean_df.index.name='datetime' # name our index as datetime
     
-    return clean_df[['half_mins_passed','heart_rate','sleep_stage','activity','mets','calories']] #returns empty list if no detailed sleep found
+    return clean_df[['time', 'half_mins_passed','heart_rate','sleep_stage','activity','mets','calories']] #returns empty list if no detailed sleep found
 
 # HELPERS
 # ================================================================================
@@ -132,3 +133,5 @@ def get_missing_days():
     for i in range((datetime.datetime.today()-last_updated).days):
         missing_days.append((datetime.datetime.today() - datetime.timedelta(days=i)).strftime('%Y-%m-%d'))
     return missing_days
+
+update_data_files()

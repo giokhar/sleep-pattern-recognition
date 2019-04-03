@@ -1,4 +1,4 @@
-from data_collection import update_data_files, import_dataframes
+from data_collection import update_data_files, import_dataframes, get_dataframe
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
