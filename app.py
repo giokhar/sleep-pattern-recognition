@@ -14,21 +14,28 @@ algorithms = {
 }
 @app.route('/')
 def index():
-	return "ALL Algorithms"
+	data = {}
+
+	data['labels'], data['values'] = [], []
+	for name in algorithms.keys():
+		data['labels'].append(name)
+		data['values'].append(round(100 * alg.get_model_score(algorithms[name]), 2))
+
+	return render_template('index.html', data=data)
 
 
-@app.route('/<algorithm>')
+@app.route('/algorithm/<algorithm>')
 def show(algorithm):
 	data = {}
 
-	data['title']  = algorithm
+	data['algorithm']  = algorithm
 	data['labels'] = [i+1 for i in range(get_num_days())]
 	data['values'] = []
 	for day in data['labels']:
 		value = round(100 * alg.get_model_score(algorithms[algorithm], days=(day)), 2)
 		data['values'].append(value)
 
-	return render_template('main.html', data=data)
+	return render_template('algorithm.html', data=data)
 
 @app.route('/update')
 def update():
