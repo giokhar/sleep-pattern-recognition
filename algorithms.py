@@ -10,7 +10,7 @@ K_NEAREST_NEIGHBOR 		= KNeighborsClassifier(n_neighbors=14)
 SUPPORT_VECTOR_MACHINE 	= SVC(kernel='rbf', C=1E10, gamma='auto', random_state=21)
 DECISION_TREE  			= DecisionTreeClassifier(max_depth=3, random_state=21)
 RANDOM_FOREST 			= RandomForestClassifier(n_estimators=100, max_depth=3, random_state=21)
-NEURAL_NETWORK 			= MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(6,), random_state=7)
+NEURAL_NETWORK 			= MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10,), random_state=7)
 
 def get_model_score(model, days="*", binary=True):
 	df = import_dataframes(days)
