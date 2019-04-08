@@ -27,8 +27,11 @@ def import_dataframes(amount="*"):
 def update_data_files():
     """Funtion that downloads the most recent csv files in the data directory"""
     for date in get_missing_days():
-        if len(get_dataframe(date)) != 0: # if dataframe is not empty for this date
-            get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
+        try:
+            if len(get_dataframe(date)) != 0: # if dataframe is not empty for this date
+                get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
+        except:
+            pass
 # ================================================================================
 
 
