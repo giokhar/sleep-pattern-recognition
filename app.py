@@ -40,7 +40,7 @@ def show(algorithm):
 @app.route('/update')
 def update():
 	update_data_files()
-	return "Updating Data Files"
+	return "Check log for updated changes"
 
 
 if __name__ == "__main__":

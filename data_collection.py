@@ -30,8 +30,10 @@ def update_data_files():
         try:
             if len(get_dataframe(date)) != 0: # if dataframe is not empty for this date
                 get_dataframe(date).to_csv("data/alta_hr/"+date+".csv")
+                print("Updated datafile for "+ str(date))
+
         except:
-            pass
+            print("Cannot update data for "+str(date))
 # ================================================================================
 
 
